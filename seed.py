@@ -1,46 +1,44 @@
-# seed.py
 from app import create_app
 from models import db, Hero, Power, HeroPower
 
+# Create the Flask app using the factory
 app = create_app()
 
+# Push app context so we can work with db
 with app.app_context():
-    # Drop and recreate all tables
-    db.drop_all()
-    db.create_all()
+    # Optional: Drop all tables if reseeding
+    # db.drop_all()
+    # db.create_all()
 
-    # Create heroes
-    heroes = [
-        Hero(name="Kamala Khan", super_name="Ms. Marvel"),
-        Hero(name="Doreen Green", super_name="Squirrel Girl"),
-        Hero(name="Gwen Stacy", super_name="Spider-Gwen"),
-        Hero(name="Janet Van Dyne", super_name="The Wasp"),
-        Hero(name="Wanda Maximoff", super_name="Scarlet Witch"),
-        Hero(name="Carol Danvers", super_name="Captain Marvel"),
-        Hero(name="Jean Grey", super_name="Dark Phoenix"),
-        Hero(name="Ororo Munroe", super_name="Storm"),
-        Hero(name="Kitty Pryde", super_name="Shadowcat"),
-        Hero(name="Elektra Natchios", super_name="Elektra"),
-    ]
+    print("Seeding data...")
 
-    powers = [
-        Power(name="super strength", description="gives the wielder super-human strengths"),
-        Power(name="flight", description="gives the wielder the ability to fly through the skies at supersonic speed"),
-        Power(name="super human senses", description="allows the wielder to use her senses at a super-human level"),
-        Power(name="elasticity", description="can stretch the human body to extreme lengths"),
-    ]
+    # Clear existing data
+    HeroPower.query.delete()
+    Hero.query.delete()
+    Power.query.delete()
 
-    db.session.add_all(heroes + powers)
+    # Add heroes
+    h1 = Hero(name="Superman", super_name="Clark Kent")
+    h2 = Hero(name="Batman", super_name="Bruce Wayne")
+    h3 = Hero(name="Wonder Woman", super_name="Diana Prince")
+
+    db.session.add_all([h1, h2, h3])
     db.session.commit()
 
-    # Link heroes and powers through HeroPowers
-    hero_powers = [
-        HeroPower(strength="Strong", hero_id=1, power_id=2),  # Kamala Khan + flight
-        HeroPower(strength="Average", hero_id=3, power_id=1), # Gwen Stacy + strength
-        HeroPower(strength="Weak", hero_id=2, power_id=3),    # Doreen Green + senses
-    ]
+    # Add powers
+    p1 = Power(name="Flight", description="Fly through the sky")
+    p2 = Power(name="Super Strength", description="Lift heavy objects")
+    p3 = Power(name="Invisibility", description="Become unseen")
 
-    db.session.add_all(hero_powers)
+    db.session.add_all([p1, p2, p3])
     db.session.commit()
 
-    print("Seeded database successfully!")
+    # Add HeroPowers
+    hp1 = HeroPower(strength="Strong", hero_id=h1.id, power_id=p1.id)
+    hp2 = HeroPower(strength="Average", hero_id=h1.id, power_id=p2.id)
+    hp3 = HeroPower(strength="Weak", hero_id=h2.id, power_id=p3.id)
+
+    db.session.add_all([hp1, hp2, hp3])
+    db.session.commit()
+
+    print("✅ Done seeding!")
